@@ -62,7 +62,7 @@ async function getGroupsForUser(event) {
 
 async function canPerformAction(event, group) {
   return new Promise(async (resolve, reject) => {
-    if (!event.requestCOntext.identity.cognitoAuthenticationProvider) {
+    if (!event.requestContext.identity.cognitoAuthenticationProvider) {
       return reject();
     }
 
@@ -145,9 +145,19 @@ app.put('/products/*', function(req, res) {
  * Example delete method *
  ****************************/
 
-app.delete('/products', function(req, res) {
-  // Add your code here
-  res.json({ success: 'delete call succeed!', url: req.url });
+app.delete('/products', async function(req, res) {
+  const { event } = req.apiGateway;
+  try {
+    await canPerformAction(event, 'Admin');
+    const params = {
+      TableName: ddb_table_name,
+      Key: { id: req.body.id }
+    };
+    await docClient.delete(params).promise();
+    res.json({ success: 'successfully deleted item' });
+  } catch (error) {
+    res.json({ error });
+  }
 });
 
 app.delete('/products/*', function(req, res) {
