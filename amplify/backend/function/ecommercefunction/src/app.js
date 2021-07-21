@@ -77,13 +77,23 @@ async function canPerformAction(event, group) {
   });
 }
 
-/**********************
- * Example get method *
- **********************/
+async function getItems() {
+  const params = { TableName: ddb_table_name };
+  try {
+    const data = await docClient.scan(params).promise();
+    return data;
+  } catch (error) {
+    return error;
+  }
+}
 
-app.get('/products', function(req, res) {
-  // Add your code here
-  res.json({ success: 'get call succeed!', url: req.url });
+app.get('/products', async function(req, res) {
+  try {
+    const data = await getItems();
+    res.json({ data });
+  } catch (error) {
+    res.json({ error });
+  }
 });
 
 app.get('/products/*', function(req, res) {
@@ -95,9 +105,21 @@ app.get('/products/*', function(req, res) {
  * Example post method *
  ****************************/
 
-app.post('/products', function(req, res) {
-  // Add your code here
-  res.json({ success: 'post call succeed!', url: req.url, body: req.body });
+app.post('/products', async function(req, res) {
+  const { body } = req;
+  const { event } = req.apiGateway;
+  try {
+    await canPerformAction(event, 'Admin');
+    const input = { ...body, id: uuid() };
+    const params = {
+      TableName: ddb_table_name,
+      Item: input
+    };
+    await docClient.put(params).promise();
+    res.json({ success: 'item saved to database..' });
+  } catch (error) {
+    res.json({ error });
+  }
 });
 
 app.post('/products/*', function(req, res) {
