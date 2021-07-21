@@ -1,6 +1,6 @@
 {
     "identityPoolName": "amplifyecommerceapp43fa5dd5_identitypool_43fa5dd5",
-    "allowUnauthenticatedIdentities": false,
+    "allowUnauthenticatedIdentities": true,
     "resourceNameTruncated": "amplif43fa5dd5",
     "userPoolName": "amplifyecommerceapp43fa5dd5_userpool_43fa5dd5",
     "autoVerifiedAttributes": [
